@@ -103,10 +103,18 @@ async function run() {
             const data = await allScholarshipCollection.find().toArray();
             res.send(data)
         })
-        app.delete('/allScholarship/:id',async(req,res)=>{
+        app.delete('/allScholarship/:id',verifyToken,verifyAdminOrModerator,async(req,res)=>{
             const id = req.params.id;
             const query = {_id: new ObjectId(id)};
             const result = await allScholarshipCollection.deleteOne(query);
+            res.send(result)
+
+        })
+        app.patch('/allScholarship/:id',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const updateData = { $set: req.body }
+            const result = await allScholarshipCollection.updateOne(query,updateData);
             res.send(result)
 
         })
@@ -129,7 +137,7 @@ async function run() {
             const data = await userCollection.find().toArray();
             res.send(data)
         })
-        app.get('/users/:email', verifyToken, verifyAdmin, async (req, res) => {
+        app.get('/users/:email', verifyToken, verifyAdminOrModerator, async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
             const result = await userCollection.findOne(query);
