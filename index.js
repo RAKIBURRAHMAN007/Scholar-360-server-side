@@ -31,6 +31,7 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         const userCollection = client.db("scholarshipDb").collection("users");
+        const allScholarshipCollection = client.db("scholarshipDb").collection("allScholarship");
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -76,6 +77,29 @@ async function run() {
         }
 
 
+        // scholarship related api
+
+      
+        const verifyAdminOrModerator = async (req, res, next) => {
+            const email = req.decoded.email; 
+            const query = { email: email };
+            const user = await userCollection.findOne(query); 
+
+            if (user?.role === 'admin' || user?.role === 'moderator') {
+                next(); 
+            } else {
+                return res.status(403).send({ message: 'Forbidden access' }); 
+            }
+        };
+
+        
+        app.post('/allScholarship', verifyToken, verifyAdminOrModerator, async (req, res) => {
+            const scholarship = req.body;
+            const result = await allScholarshipCollection.insertOne(scholarship); 
+            res.send(result); 
+        });
+
+
 
         // user related apis
         app.post('/users', async (req, res) => {
@@ -89,17 +113,23 @@ async function run() {
             res.send(result)
 
         })
-        app.get('/users', verifyToken,verifyAdmin, async (req, res) => {
+        app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
             const data = await userCollection.find().toArray();
             res.send(data)
         })
-        app.delete('/users/:id',verifyToken,verifyAdmin, async (req, res) => {
+        app.get('/users/:email', verifyToken, verifyAdmin, async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const result = await userCollection.findOne(query);
+            res.send(result);
+        })
+        app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await userCollection.deleteOne(query);
             res.send(result)
         })
-        app.patch('/users/admin/:id',verifyToken,verifyAdmin, async (req, res) => {
+        app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
             const updatedDoc = {
@@ -110,7 +140,7 @@ async function run() {
             const result = await userCollection.updateOne(filter, updatedDoc);
             res.send(result);
         })
-        app.patch('/users/moderator/:id',verifyToken,verifyAdmin, async (req, res) => {
+        app.patch('/users/moderator/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
             const updatedDoc = {
@@ -121,7 +151,7 @@ async function run() {
             const result = await userCollection.updateOne(filter, updatedDoc);
             res.send(result);
         })
-        app.patch('/users/user/:id',verifyToken,verifyAdmin, async (req, res) => {
+        app.patch('/users/user/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
             const updatedDoc = {
