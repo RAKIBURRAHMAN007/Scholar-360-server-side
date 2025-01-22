@@ -99,6 +99,18 @@ async function run() {
             res.send(result); 
         });
 
+        app.get('/allScholarship',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+            const data = await allScholarshipCollection.find().toArray();
+            res.send(data)
+        })
+        app.delete('/allScholarship/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const result = await allScholarshipCollection.deleteOne(query);
+            res.send(result)
+
+        })
+
 
 
         // user related apis
