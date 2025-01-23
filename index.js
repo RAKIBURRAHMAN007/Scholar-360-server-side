@@ -79,42 +79,58 @@ async function run() {
 
         // scholarship related api
 
-      
+
         const verifyAdminOrModerator = async (req, res, next) => {
-            const email = req.decoded.email; 
+            const email = req.decoded.email;
             const query = { email: email };
-            const user = await userCollection.findOne(query); 
+            const user = await userCollection.findOne(query);
 
             if (user?.role === 'admin' || user?.role === 'moderator') {
-                next(); 
+                next();
             } else {
-                return res.status(403).send({ message: 'Forbidden access' }); 
+                return res.status(403).send({ message: 'Forbidden access' });
             }
         };
 
-        
+
         app.post('/allScholarship', verifyToken, verifyAdminOrModerator, async (req, res) => {
             const scholarship = req.body;
-            const result = await allScholarshipCollection.insertOne(scholarship); 
-            res.send(result); 
+            const result = await allScholarshipCollection.insertOne(scholarship);
+            res.send(result);
         });
 
-        app.get('/allScholarship',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+        app.get('/allScholarship', verifyToken, verifyAdminOrModerator, async (req, res) => {
             const data = await allScholarshipCollection.find().toArray();
             res.send(data)
         })
-        app.delete('/allScholarship/:id',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+        app.get('/allScholarships', async (req, res) => {
+            const data = await allScholarshipCollection.find().toArray();
+            res.send(data)
+        })
+        app.get('/topScholarship', async (req, res) => {
+            const data = await allScholarshipCollection
+                .find()
+                .sort({
+                    applicationFees: 1,
+                    scholarshipPostDate: -1
+                }) 
+                .limit(6) 
+                .toArray();
+            res.send(data);
+        });
+
+        app.delete('/allScholarship/:id', verifyToken, verifyAdminOrModerator, async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const result = await allScholarshipCollection.deleteOne(query);
             res.send(result)
 
         })
-        app.patch('/allScholarship/:id',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+        app.patch('/allScholarship/:id', verifyToken, verifyAdminOrModerator, async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const updateData = { $set: req.body }
-            const result = await allScholarshipCollection.updateOne(query,updateData);
+            const result = await allScholarshipCollection.updateOne(query, updateData);
             res.send(result)
 
         })
