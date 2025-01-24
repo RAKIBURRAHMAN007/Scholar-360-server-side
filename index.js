@@ -33,6 +33,7 @@ async function run() {
         await client.connect();
         const userCollection = client.db("scholarshipDb").collection("users");
         const allScholarshipCollection = client.db("scholarshipDb").collection("allScholarship");
+        const appliedScholarshipCollection = client.db("scholarshipDb").collection("appliedScholarships");
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -141,7 +142,12 @@ async function run() {
             res.send(result)
 
         })
-
+        // applied scholarship
+        app.post('/appliedScholarships',verifyToken,async(req,res)=>{
+            const data = req.body;
+            const result = await appliedScholarshipCollection.insertOne(data);
+            res.send(result)
+        })
 
 
         // user related apis
@@ -160,13 +166,20 @@ async function run() {
             const data = await userCollection.find().toArray();
             res.send(data)
         })
+        // app.get('/user/:email',async(req,res)=>{
+        //     const email = req.params.email;
+        //     const query = {email: email};
+        //     const data =await userCollection.findOne(query);
+        //     res.send(data)
+
+        // })
         app.get('/users/:email', verifyToken, verifyAdminOrModerator, async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
             const result = await userCollection.findOne(query);
             res.send(result);
         })
-        app.get('/normalUsers/:email', async (req, res) => {
+        app.get('/normalUsers/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
             const result = await userCollection.findOne(query);
@@ -248,6 +261,7 @@ async function run() {
         // payment related apis
         app.post('/create-checkout-session', async (req, res) => {
             const { price } = req.body;
+
             const amount = parseInt(price * 100);
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: amount,
