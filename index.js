@@ -148,6 +148,19 @@ async function run() {
             const result = await appliedScholarshipCollection.insertOne(data);
             res.send(result)
         })
+        // scholarship for a user
+        app.get('/appliedScholarships/:email',verifyToken,async(req,res)=>{
+            const email = req.params.email;
+            const query = {userMail: email};
+            const result = await appliedScholarshipCollection.find(query).toArray();
+            res.send(result)
+        })
+        app.delete('/appliedScholarships/:id',verifyToken,async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const data = await appliedScholarshipCollection.deleteOne(query)
+            res.send(data)
+        })
 
 
         // user related apis
