@@ -176,6 +176,16 @@ async function run() {
             res.send(data)
         })
 
+
+        app.patch('/appliedScholarshipStatus/:id',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const updateData = { $set: req.body};
+            const data = await appliedScholarshipCollection.updateOne(query,updateData);
+            res.send(data)
+            
+        })
+
         // post review
         app.post('/reviews',verifyToken,async(req,res)=>{
             const data = req.body;
@@ -263,6 +273,7 @@ async function run() {
             const result = await userCollection.findOne(query);
             res.send(result);
         })
+        
         app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
