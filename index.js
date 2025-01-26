@@ -372,6 +372,31 @@ async function run() {
                 clientSecret: paymentIntent.client_secret,
             });
         })
+       
+        app.get('/admin-stats', verifyToken, verifyAdmin, async (req, res) => {
+            try {
+                const usersCount = await userCollection.estimatedDocumentCount();
+                const scholarshipsCount = await allScholarshipCollection.estimatedDocumentCount();
+                const applicationsCount = await appliedScholarshipCollection.estimatedDocumentCount();
+                const reviewsCount = await reviewCollection.estimatedDocumentCount();
+
+               
+                
+
+               
+                res.send({
+                    users: usersCount,
+                    scholarships: scholarshipsCount,
+                    applications: applicationsCount,
+                    reviews: reviewsCount,
+                    
+                });
+            } catch (error) {
+                console.error("Error fetching admin stats:", error);
+                res.status(500).send({ message: "Failed to fetch admin statistics" });
+            }
+        });
+
 
 
     } finally {
