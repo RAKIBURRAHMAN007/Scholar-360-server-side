@@ -197,6 +197,17 @@ async function run() {
             const data = await reviewCollection.updateOne(query,updateData);
             res.send(data)
         })
+        app.get('/allReviews',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+            const data = await reviewCollection.find().toArray();
+            res.send(data)
+        })
+        app.delete('/allReviews/delete/:id',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const data = await reviewCollection.deleteOne(query);
+            res.send(data)
+
+        })
         app.patch('/appliedScholarships/:id',verifyToken,async(req,res)=>{
             const id = req.params.id;
             const query = {_id: new ObjectId(id)};
