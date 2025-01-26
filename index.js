@@ -144,98 +144,109 @@ async function run() {
 
         })
         // applied scholarship
-        app.post('/appliedScholarships',verifyToken,async(req,res)=>{
+        app.post('/appliedScholarships', verifyToken, async (req, res) => {
             const data = req.body;
             const result = await appliedScholarshipCollection.insertOne(data);
             res.send(result)
         })
         // scholarship for a user
-        app.get('/appliedScholarships/:email',verifyToken,async(req,res)=>{
+        app.get('/appliedScholarships/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
-            const query = {userMail: email};
+            const query = { userMail: email };
             const result = await appliedScholarshipCollection.find(query).toArray();
             res.send(result)
         })
-        app.delete('/appliedScholarships/:id',verifyToken,async(req,res)=>{
+        app.delete('/appliedScholarships/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const data = await appliedScholarshipCollection.deleteOne(query)
             res.send(data)
         })
         // get all scholarship
-        app.get('/allAppliedScholarship',verifyToken,verifyAdminOrModerator,async(req,res)=>{
-            const data = await appliedScholarshipCollection.find().toArray();
+        app.get('/allAppliedScholarship', verifyToken, verifyAdminOrModerator, async (req, res) => {
+            const { sortBy } = req.query;
+
+            let sortCriteria = {};
+            if (sortBy === 'applicationDate') {
+                sortCriteria = {
+                    applicationDate: 1
+                };
+            } else if (sortBy === 'deadLine') {
+                sortCriteria = { deadLine: 1 };
+            }
+
+            const data = await appliedScholarshipCollection.find().sort(sortCriteria).toArray();
             res.send(data);
-        })
+        });
 
-        app.patch('/appliedScholarshipFeedback/:id',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+        app.patch('/appliedScholarshipFeedback/:id', verifyToken, verifyAdminOrModerator, async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const updateData = { $set: req.body };
-            const data = await appliedScholarshipCollection.updateOne(query,updateData);
+            const data = await appliedScholarshipCollection.updateOne(query, updateData);
             res.send(data)
         })
 
 
-        app.patch('/appliedScholarshipStatus/:id',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+        app.patch('/appliedScholarshipStatus/:id', verifyToken, verifyAdminOrModerator, async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
-            const updateData = { $set: req.body};
-            const data = await appliedScholarshipCollection.updateOne(query,updateData);
+            const query = { _id: new ObjectId(id) };
+            const updateData = { $set: req.body };
+            const data = await appliedScholarshipCollection.updateOne(query, updateData);
             res.send(data)
-            
+
         })
 
         // post review
-        app.post('/reviews',verifyToken,async(req,res)=>{
+        app.post('/reviews', verifyToken, async (req, res) => {
             const data = req.body;
-            const result= await reviewCollection.insertOne(data);
+            const result = await reviewCollection.insertOne(data);
             res.send(result)
         })
-        app.get('/reviews/:id',async(req,res)=>{
+        app.get('/reviews/:id', async (req, res) => {
             const id = req.params.id;
-            
+
             const query = { scholarshipId: id };
             const data = await reviewCollection.find(query).toArray()
             res.send(data)
         })
-        app.get('/userReviews/:email',verifyToken,async(req,res)=>{
+        app.get('/userReviews/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             console.log('Received email:', email);
-            const query = {userEmail: email};
-            const data =await reviewCollection.find(query).toArray();
+            const query = { userEmail: email };
+            const data = await reviewCollection.find(query).toArray();
             res.send(data)
         })
-        app.delete('/userReviews/delete/:id',verifyToken,async(req,res)=>{
+        app.delete('/userReviews/delete/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const data = await reviewCollection.deleteOne(query);
             res.send(data)
         })
 
-        app.patch('/userReviews/update/:id',verifyToken,async(req,res)=>{
+        app.patch('/userReviews/update/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
-            const query ={_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const updateData = { $set: req.body };
-            const data = await reviewCollection.updateOne(query,updateData);
+            const data = await reviewCollection.updateOne(query, updateData);
             res.send(data)
         })
-        app.get('/allReviews',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+        app.get('/allReviews', verifyToken, verifyAdminOrModerator, async (req, res) => {
             const data = await reviewCollection.find().toArray();
             res.send(data)
         })
-        app.delete('/allReviews/delete/:id',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+        app.delete('/allReviews/delete/:id', verifyToken, verifyAdminOrModerator, async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const data = await reviewCollection.deleteOne(query);
             res.send(data)
 
         })
-        app.patch('/appliedScholarships/:id',verifyToken,async(req,res)=>{
+        app.patch('/appliedScholarships/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const updateData = { $set: req.body };
-            const data = await appliedScholarshipCollection.updateOne(query,updateData) ;
+            const data = await appliedScholarshipCollection.updateOne(query, updateData);
             res.send(data)
         })
         // user related apis
@@ -273,7 +284,7 @@ async function run() {
             const result = await userCollection.findOne(query);
             res.send(result);
         })
-        
+
         app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
