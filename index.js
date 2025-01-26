@@ -162,6 +162,19 @@ async function run() {
             const data = await appliedScholarshipCollection.deleteOne(query)
             res.send(data)
         })
+        // get all scholarship
+        app.get('/allAppliedScholarship',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+            const data = await appliedScholarshipCollection.find().toArray();
+            res.send(data);
+        })
+
+        app.patch('/appliedScholarshipFeedback/:id',verifyToken,verifyAdminOrModerator,async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const updateData = { $set: req.body };
+            const data = await appliedScholarshipCollection.updateOne(query,updateData);
+            res.send(data)
+        })
 
         // post review
         app.post('/reviews',verifyToken,async(req,res)=>{
