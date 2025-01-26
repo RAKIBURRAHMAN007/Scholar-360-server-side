@@ -34,6 +34,7 @@ async function run() {
         const userCollection = client.db("scholarshipDb").collection("users");
         const allScholarshipCollection = client.db("scholarshipDb").collection("allScholarship");
         const appliedScholarshipCollection = client.db("scholarshipDb").collection("appliedScholarships");
+        const reviewCollection = client.db("scholarshipDb").collection("reviews");
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -162,7 +163,47 @@ async function run() {
             res.send(data)
         })
 
+        // post review
+        app.post('/reviews',verifyToken,async(req,res)=>{
+            const data = req.body;
+            const result= await reviewCollection.insertOne(data);
+            res.send(result)
+        })
+        app.get('/reviews/:id',async(req,res)=>{
+            const id = req.params.id;
+            
+            const query = { scholarshipId: id };
+            const data = await reviewCollection.find(query).toArray()
+            res.send(data)
+        })
+        app.get('/userReviews/:email',verifyToken,async(req,res)=>{
+            const email = req.params.email;
+            console.log('Received email:', email);
+            const query = {userEmail: email};
+            const data =await reviewCollection.find(query).toArray();
+            res.send(data)
+        })
+        app.delete('/userReviews/delete/:id',verifyToken,async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const data = await reviewCollection.deleteOne(query);
+            res.send(data)
+        })
 
+        app.patch('/userReviews/update/:id',verifyToken,async(req,res)=>{
+            const id = req.params.id;
+            const query ={_id: new ObjectId(id)};
+            const updateData = { $set: req.body };
+            const data = await reviewCollection.updateOne(query,updateData);
+            res.send(data)
+        })
+        app.patch('/appliedScholarships/:id',verifyToken,async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const updateData = { $set: req.body };
+            const data = await appliedScholarshipCollection.updateOne(query,updateData) ;
+            res.send(data)
+        })
         // user related apis
         app.post('/users', async (req, res) => {
             const user = req.body;
