@@ -379,10 +379,6 @@ async function run() {
                 const scholarshipsCount = await allScholarshipCollection.estimatedDocumentCount();
                 const applicationsCount = await appliedScholarshipCollection.estimatedDocumentCount();
                 const reviewsCount = await reviewCollection.estimatedDocumentCount();
-
-               
-                
-
                
                 res.send({
                     users: usersCount,
@@ -396,6 +392,37 @@ async function run() {
                 res.status(500).send({ message: "Failed to fetch admin statistics" });
             }
         });
+        app.get('/user-stats/:email', verifyToken, async (req, res) => {
+            try {
+              const email = req.params.email;
+          
+            
+              const user = await userCollection.findOne({ email: email });
+          
+              if (!user) {
+                return res.status(404).send({ message: "User not found" });
+              }
+          
+            
+              const applicationsCount = await appliedScholarshipCollection.countDocuments({ userMail: email });
+          
+           
+              const reviewsCount = await reviewCollection.countDocuments({ 
+                userEmail: email });
+          
+              res.send({
+                applicationsCount: applicationsCount,
+                reviewsCount: reviewsCount,
+              });
+            } catch (error) {
+              console.error("Error fetching user stats:", error);
+              res.status(500).send({ message: "Failed to fetch user statistics" });
+            }
+          });
+          
+          
+        
+        
 
 
 
